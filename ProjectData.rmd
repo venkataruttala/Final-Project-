@@ -1,0 +1,22 @@
+-----
+title: "Project_Data"
+author: "Venkata Ruttala"
+Project Partner :"Lalit Goud Palsm"
+date: "3/30/2019"
+output: XLS file 
+-----
+
+```{r}
+#source:https://www.ers.usda.gov/data-products/county-level-data-sets/download-data/
+#The Small Area Income and Poverty Estimates (SAIPE) program provides model-based poverty estimates for school districts, counties, and states.The main purpose of picking this data is to find which age group people are more poor compared to other age groups in the years 2013 and 2017 as per the census bureau analysis.
+
+# Question would be able to answer : people under which age are more in count in poverty level in 2017
+#ages falls under 0-17 ,5-17 and 0-4 
+
+ProjectData<-read.csv("PovertyEstimates.csv",TRUE,",")
+ProjectData<-data.frame(ProjectData)
+ProjectData[3:3000,1:28]
+ProjectData
+
+```
+
