@@ -1,0 +1,115 @@
+-----
+title: "Final project model"
+author: "Venkata Ruttala"
+Project Partner :"Lalit Goud Palsm"
+date: "4/23/2019"
+output: XLS file 
+-----
+
+```{r}
+#source:https://www.ers.usda.gov/data-products/county-level-data-sets/download-data/
+#The Small Area Income and Poverty Estimates (SAIPE) program provides model-based poverty estimates for school districts, counties, and states.The main purpose of picking this data is to find which age group people are more poor compared to other age groups in the years 2013 and 2017 as per the census bureau analysis.
+
+# Question would be able to answer : people under which age are more in count in poverty level in 2017
+#ages falls under 0-17 ,5-17 and 0-4 
+
+ProjectData<-read.csv("PovertyEstimates.csv",TRUE,",")
+ProjectData<-data.frame(ProjectData)
+ProjectData<-ProjectData[3:550,1:28]
+
+any(is.na(ProjectData[]))
+colSums(is.na(ProjectData))
+
+my.data<-data.frame(na.omit(ProjectData))
+my.data
+my.data$overallPoverty_2017<-as.numeric(my.data$POVALL_2017)
+my.data$age0_17_2017<-as.numeric(my.data$POV017_2017 )
+my.data$age5_17_2017<-as.numeric(my.data$POV517_2017 )
+str(my.data)
+
+##### 1st model linear regression 
+
+
+ggplot((my.data),aes(x=age0_17_2017,y=overallPoverty_2017))+geom_point(size=2,colour="blue",alpha=0.2)+geom_smooth(method=lm,se=FALSE,colour="black")
+
+fit<-lm(overallPoverty_2017~age0_17_2017,data=my.data)
+coef(fit)
+summary(fit)
+
+qqmath(~resid(fit),xlab="Values",ylab="Residuals",main="diagnosis between overall ages between 0 to 17")
+
+my.data$predicted<-predict(fit)
+my.data$residuals<-residuals(fit)
+
+ggplot(my.data,aes(x=age0_17_2017,y=overallPoverty_2017))+geom_point()+geom_point(aes(y=predicted),shape=1)
+
+ggplot(my.data,aes(x=age0_17_2017,y=overallPoverty_2017))+geom_segment(aes(xend=age0_17_2017,yend=predicted))+geom_point()+geom_point(aes(y=predicted),shape=1)
+
+# differentiating upper and lower color
+ggplot(my.data,aes(x=age0_17_2017,y=overallPoverty_2017))+geom_smooth(method=lm,se=FALSE,color="lightgrey")+geom_segment(aes(xend=age0_17_2017,yend=predicted),alpha=0.2)+geom_point(aes(color=residuals))+scale_color_gradient2(low="blue",high="red")+guides(color=FALSE)+geom_point(aes(y=predicted),shape=1)
+
+#######2nd Model using polynomial regression model
+
+
+
+#linear Regression
+model1<-lm(overallPoverty_2017~PCTPOV017_2017,data=my.data)
+model1$fit
+model1$coeff
+#polynomial Regression
+new_x<-cbind(my.data$PCTPOV017_2017,my.data$PCTPOV017_2017^2)
+new_x
+
+model2<-lm(overallPoverty_2017~new_x,data=my.data)
+model2$fit
+model2$coeff
+
+ggplot(data=my.data)+geom_point(aes(x=PCTPOV017_2017,y=overallPoverty_2017))+
+geom_line(aes(x=PCTPOV017_2017,y=model1$fit),color="red")+
+geom_line(aes(x=PCTPOV017_2017,y=model2$fit),color="blue")+
+theme(panel.background=element_blank())
+
+qqmath(~resid(model2),xlab="Values",ylab="Residuals",main="diagnosis between overall population poverty and percentages of people")
+
+my.data$predictedpct<-predict(model2)
+my.data$residualspct<-residuals(model2)
+
+ggplot(my.data,aes(x=PCTPOV017_2017,y=overallPoverty_2017))+geom_point()+geom_point(aes(y=predictedpct),shape=1)
+
+ggplot(my.data,aes(x=PCTPOV017_2017,y=overallPoverty_2017))+geom_segment(aes(xend=PCTPOV017_2017,yend=predictedpct))+geom_point()+geom_point(aes(y=predictedpct),shape=1)
+
+# differentiating upper and lower color
+ggplot(my.data,aes(x=PCTPOV017_2017,y=overallPoverty_2017))+geom_segment(aes(xend=PCTPOV017_2017,yend=predictedpct),alpha=0.2)+geom_point(aes(color=residualspct))+scale_color_gradient2(low="blue",high="red")+guides(color=FALSE)+geom_point(aes(y=predictedpct),shape=1)
+
+
+##3rd model Logistic Regression Model 
+##
+#model3<-glm(overallPoverty_2017~age5_17_2017,data=my.data,family="binomial")
+#model3$fit
+#model3$coeff
+# No coefficients or fitted values are generated since the values of y are not equal to 0 or 1.So Logistic Regression Model cannot be used for this data.
+
+
+###### 4th model 
+
+
+model4<-rq(overallPoverty_2017~age5_17_2017,data=my.data,tau=0.25)
+summary(model4)
+
+model41<-rq(overallPoverty_2017~age5_17_2017,data=my.data,tau=seq(0.05,0.95,by=0.1))
+quantplot<-summary(model41)
+quantplot
+plot(quantplot)
+
+my.data$predicted517<-predict(model4)
+my.data$residuals517<-residuals(model4)
+
+ggplot(my.data,aes(x=age5_17_2017,y=overallPoverty_2017))+geom_point()+geom_point(aes(y=predicted517),shape=1)
+
+ggplot(my.data,aes(x=age5_17_2017,y=overallPoverty_2017))+geom_segment(aes(xend=age5_17_2017,yend=predicted517))+geom_point()+geom_point(aes(y=predicted517),shape=1)
+
+# differentiating upper and lower color
+ggplot(my.data,aes(x=age5_17_2017,y=overallPoverty_2017))+geom_segment(aes(xend=age5_17_2017,yend=predicted517),alpha=0.2)+geom_point(aes(color=residuals517))+scale_color_gradient2(low="blue",high="red")+guides(color=FALSE)+geom_point(aes(y=predicted517),shape=1)
+
+```
+
