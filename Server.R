@@ -1,16 +1,4 @@
-##Question: poverty estimation of US states and the counties in 2017
-#basing on ages and medium houshold Income
 
-#Here we estimate poverty rate of people, are divided into  3 groups based on age and their income. people of age between 0 to 17, 5 to 17 and 0 - 4.
-#Overall poverty estimation is given based on count of people and in percentages.
-
-#Initially, we had taken the data from data.gov, and extracted data from excel sheet formed a data frame. 
-#Here we took 3 independent variables(predictors). developed linear regression model taking POV_0_17 as predictor and POVALL_2017 as dependent variable.y = a+bX.
-#Secondly created another model linear regression model with 2 variables taking  POV_0_17 +POV_5_17   predictors estimating overall poverty basing on those two 
-#(y=ax1+bx2+c).Finally created another multivariable regression taking predictors as POV_0_17 +POV_5_17+mediumHouseholdIncome) as predictor and taking 
-#overall poverty_2017 as independent variable ( lm(pov_all_2017 ~pov_0_17+pov_5_17+mediumHouseholdIncome). Out of all these 3 models
-#we considered third model would be best when compared to other two, 
-#because in the third model estimation is based on both 2 groups of ages and householdIncome
 
 library(shiny)
 
